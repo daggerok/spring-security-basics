@@ -10,7 +10,7 @@
   </parent>
   <packaging>jar</packaging>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>step-1-test-application-with-default-spring-security</artifactId>
+  <artifactId>step-1-test-default-spring-security</artifactId>
   <dependencies>
     <dependency>
       <groupId>com.codeborne</groupId>

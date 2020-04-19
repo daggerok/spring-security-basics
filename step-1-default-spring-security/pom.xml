@@ -10,7 +10,7 @@
   </parent>
   <packaging>jar</packaging>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>step-1-application-with-default-spring-security</artifactId>
+  <artifactId>step-1-default-spring-security</artifactId>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
