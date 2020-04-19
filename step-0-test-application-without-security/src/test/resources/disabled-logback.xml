@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%boldWhite(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %magenta(%-9.9thread{9}) [ %cyan(%18.18logger{18}) %highlight(%-15.15M{15}) ] - %gray(%msg%n)</pattern>
+    </encoder>
+  </appender>
+  <logger name="daggerok" level="info"/>
+  <root level="info">
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>
