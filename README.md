@@ -4,7 +4,8 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 ## Table of Content
 * [Step 0: No security](#step-0)
 * [Step 1: Add authentication](#step-1)
-* [Step 2: TODO: Add authorization](#step-2)
+* [Step 2: Custom authentication](#step-2)
+* [Step 3: TODO: Add authorization](#step-3)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -221,10 +222,12 @@ http post :8080/actuator/shutdown
 
 ## step: 2
 
+to be continued...
+
+## step: 3
+
 next step is adding authorization, so we can distinguish that different users
 have access to some resources where others are not!
-
-## to be continued...
 
 ## maven
 
