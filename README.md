@@ -222,7 +222,35 @@ http post :8080/actuator/shutdown
 
 ## step: 2
 
-to be continued...
+let's add few users for authorization:
+
+```java
+@EnableWebSecurity
+class MyWebSecurity extends WebSecurityConfigurerAdapter {
+
+  @Bean
+  PasswordEncoder passwordEncoder() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+  }
+
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    auth.inMemoryAuthentication()
+          .withUser("user")
+            .password(passwordEncoder().encode("password"))
+            .roles("USER")
+            .and()
+          .withUser("admin")
+            .password(passwordEncoder().encode("admin"))
+            .roles("USER", "ADMIN")
+        ;
+  }
+
+  // ...
+}
+```
+
+now we can authenticate with `users`/`password` or `admin`/`admin`
 
 ## step: 3
 
@@ -271,6 +299,7 @@ next snapshot version:
 
 * [YouTube: Spring Security Basics](https://www.youtube.com/playlist?list=PLqq-6Pq4lTTYTEooakHchTGglSvkZAjnE)
 * https://github.com/daggerok/spring-security-examples
+<!--
 * [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
 * [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.3.0.M4/maven-plugin/reference/html/)
 * [Create an OCI image](https://docs.spring.io/spring-boot/docs/2.3.0.M4/maven-plugin/reference/html/#build-image)
@@ -283,3 +312,4 @@ next snapshot version:
 * [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
 * [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
 * [Building REST services with Spring](https://spring.io/guides/tutorials/bookmarks/)
+-->

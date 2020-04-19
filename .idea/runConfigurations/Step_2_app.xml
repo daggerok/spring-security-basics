@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Step-1-app" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="step-1-default-spring-security" />
+  <configuration default="false" name="Step-2-app" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="step-2-custom-authentication" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="daggerok.*" />

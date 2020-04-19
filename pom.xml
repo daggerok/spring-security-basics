@@ -13,6 +13,8 @@
     <module>step-0-test-application-without-security</module>
     <module>step-1-default-spring-security</module>
     <module>step-1-test-default-spring-security</module>
+    <module>step-2-custom-authentication</module>
+    <module>step-2-test-custom-authentication</module>
   </modules>
   <properties>
     <encoding>UTF-8</encoding>
