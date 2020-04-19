@@ -11,6 +11,8 @@
   <modules>
     <module>step-0-application-without-security</module>
     <module>step-0-test-application-without-security</module>
+    <module>step-1-application-with-default-spring-security</module>
+    <module>step-1-test-application-with-default-spring-security</module>
   </modules>
   <properties>
     <encoding>UTF-8</encoding>
@@ -164,7 +166,13 @@
   </build>
   <profiles>
     <profile>
-      <id>e2e</id>
+      <id>ci</id>
+      <activation>
+        <property>
+          <name>env.SPRING_PROFILES_ACTIVE</name>
+          <value>ci</value>
+        </property>
+      </activation>
       <build>
         <plugins>
           <plugin>

@@ -3,12 +3,13 @@ Learn Spring Security by baby steps from zero to pro!
 
 ## Table of Content
 * [Step 0: No security](#step-0)
+* [Step 1: Add authentication](#step-1)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
 ## step: 0
 
-let's use simple spring boot web app
+let's use simple spring boot web app without security at all!
 
 ### application
 
@@ -57,10 +58,12 @@ finally, to gracefully shutdown application under test on CI builds,
 add actuator dependency:
 
 ```xml
+  <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
+  </dependencies>
 ```
 
 with according configurations in `application.yaml` file:
@@ -113,11 +116,12 @@ class AppTest extends AbstractTest {
 
   @Test
   void test() {
-    open("http://127.0.0.1:8080");
-    var h1 = $("h1");
+    open("http://127.0.0.1:8080"); // open home page...
+    var h1 = $("h1");              // find there <h1> tag...
     log.info("h1 html: {}", h1);
-    h1.shouldBe(exist, visible)
-      .shouldHave(text("hello"));
+    h1.shouldBe(exist, visible)    // element should be inside DOM
+      .shouldHave(text("hello"));  // textContent of the tag should
+                                   // contains expected content...
   }
 }
 ```
@@ -131,6 +135,58 @@ build, run test and cleanup:
 java -jar ./step-0-application-without-security/target/*jar --spring.profiles.active=ci &
 ./mvnw -Dgroups=e2e -f step-0-test-application-without-security
 http post :8080/actuator/shutdown
+```
+
+## step: 1
+
+in this step we are going to implement simple authentication.
+it's mean everyone who logged in, can access all available
+resources.
+
+### application
+
+add required dependencies:
+
+```xml
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+  </dependencies>
+```
+
+update `application.yaml` configuration with desired user password:
+
+```yaml
+spring:
+  security:
+    user:
+      password: pwd
+```
+
+### test application
+
+now, let's update test according to configured security as follows:
+
+```java
+@Log4j2
+@AllArgsConstructor
+class AppTest extends AbstractTest {
+
+  @Test
+  void test() {
+    open("http://127.0.0.1:8080");
+    // we should be redirected to login page, so lets authenticate!
+    $("#username").setValue("user");
+    $("#password").setValue("pwd").submit();
+    // everything else is with no changes...
+    var h1 = $("h1");
+    log.info("h1 html: {}", h1);
+    h1.shouldBe(exist, visible)
+      .shouldHave(text("hello"));
+  }
+}
 ```
 
 ## maven

@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Step-1-app" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="step-1-application-with-default-spring-security" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="daggerok.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="daggerok.App" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <envs>
+      <env name="SPRING_PROFILES_ACTIVE" value="ci" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
