@@ -7,7 +7,7 @@
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="SPRING_BOOT_MAIN_CLASS" value="daggerok.App" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="daggerok.Application" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <envs>
       <env name="SPRING_PROFILES_ACTIVE" value="ci" />

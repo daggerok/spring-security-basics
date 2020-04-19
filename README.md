@@ -1,9 +1,10 @@
 # spring-security-basics [![CI](https://github.com/daggerok/spring-security-basics/workflows/CI/badge.svg)](https://github.com/daggerok/spring-security-basics/actions?query=workflow%3ACI)
-Learn Spring Security by baby steps from zero to pro!
+Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 
 ## Table of Content
 * [Step 0: No security](#step-0)
 * [Step 1: Add authentication](#step-1)
+* [Step 2: TODO: Add authorization](#step-2)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -16,15 +17,15 @@ let's use simple spring boot web app without security at all!
 use needed dependencies in `pom.xml` file:
 
 ```xml
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-  </dependencies>
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
+</dependencies>
 ```
 
-add in `App.java` file controller for index page:
+add in `Application.java` file controller for index page:
 
 ```java
 @Controller
@@ -58,12 +59,12 @@ finally, to gracefully shutdown application under test on CI builds,
 add actuator dependency:
 
 ```xml
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-  </dependencies>
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+  </dependency>
+</dependencies>
 ```
 
 with according configurations in `application.yaml` file:
@@ -98,13 +99,13 @@ java -jar /path/to/jar --spring.profiles.active=ci
 use required dependencies:
 
 ```xml
-  <dependencies>
-    <dependency>
-      <groupId>com.codeborne</groupId>
-      <artifactId>selenide</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+<dependencies>
+  <dependency>
+    <groupId>com.codeborne</groupId>
+    <artifactId>selenide</artifactId>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
 ```
 
 implement Selenide test:
@@ -112,7 +113,7 @@ implement Selenide test:
 ```java
 @Log4j2
 @AllArgsConstructor
-class AppTest extends AbstractTest {
+class ApplicationTest extends AbstractTest {
 
   @Test
   void test() {
@@ -148,12 +149,12 @@ resources.
 add required dependencies:
 
 ```xml
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
-  </dependencies>
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+  </dependency>
+</dependencies>
 ```
 
 update `application.yaml` configuration with desired user password:
@@ -165,6 +166,26 @@ spring:
       password: pwd
 ```
 
+tune little bit security config to bein able shutdown application with POST:
+we have to permit it and disable CSRF:
+
+```java
+@EnableWebSecurity
+class MyWebSecurity extends WebSecurityConfigurerAdapter {
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.authorizeRequests()
+          .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
+          .anyRequest().authenticated()
+        .and()
+          .csrf().disable()
+        .formLogin()
+    ;
+  }
+}
+```
+
 ### test application
 
 now, let's update test according to configured security as follows:
@@ -172,7 +193,7 @@ now, let's update test according to configured security as follows:
 ```java
 @Log4j2
 @AllArgsConstructor
-class AppTest extends AbstractTest {
+class ApplicationTest extends AbstractTest {
 
   @Test
   void test() {
@@ -189,9 +210,38 @@ class AppTest extends AbstractTest {
 }
 ```
 
+build, run test and cleanup:
+
+```bash
+./mvnw -f step-0-application-without-security
+SPRING_PROFILES_ACTIVE=ci java -jar ./step-0-application-without-security/target/*jar &
+./mvnw -Dgroups=e2e -f step-0-test-application-without-security
+http post :8080/actuator/shutdown
+```
+
+## step: 2
+
+next step is adding authorization, so we can distinguish that different users
+have access to some resources where others are not!
+
+## to be continued...
+
 ## maven
 
 we will be releasing after each important step! so it will be easy simply checkout needed version from git tag.
+
+release version without maven-release-plugin (when you aren't using *-SNAPSHOT version for development):
+
+```bash
+currentVersion=`./mvnw -q --non-recursive exec:exec -Dexec.executable=echo -Dexec.args='${project.version}'`
+git tag "v$currentVersion"
+
+./mvnw build-helper:parse-version -DgenerateBackupPoms=false versions:set -DgenerateBackupPoms=false \
+  -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}
+nextVersion=`./mvnw -q --non-recursive exec:exec -Dexec.executable=echo -Dexec.args='${project.version}'`
+__
+git add . ; git commit -am "v$currentVersion release." ; git push --tags
+```
 
 increment version:
 
@@ -212,32 +262,6 @@ next snapshot version:
 ```bash
 # 1.2.3? -> 1.2.4-SNAPSHOT
 ./mvnw build-helper:parse-version -DgenerateBackupPoms=false versions:set -DgenerateBackupPoms=false -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT
-```
-
-release version without maven-release-plugin (when you aren't using *-SNAPSHOT version for development):
-
-```bash
-currentVersion=`./mvnw -q --non-recursive exec:exec -Dexec.executable=echo -Dexec.args='${project.version}'`
-git tag "v$currentVersion"
-
-./mvnw build-helper:parse-version -DgenerateBackupPoms=false versions:set -DgenerateBackupPoms=false \
-  -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}
-nextVersion=`./mvnw -q --non-recursive exec:exec -Dexec.executable=echo -Dexec.args='${project.version}'`
-__
-git add . ; git commit -am "v$currentVersion release." ; git push --tags
-```
-
-release version using maven-release-plugin (when you are using *-SNAPSHOT version for development):
-
-```bash
-currentVersion=`./mvnw -q --non-recursive exec:exec -Dexec.executable=echo -Dexec.args='${project.version}'`
-./mvnw build-helper:parse-version -DgenerateBackupPoms=false versions:set \
-    -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}
-developmentVersion=`./mvnw -q --non-recursive exec:exec -Dexec.executable=echo -Dexec.args='${project.version}'`
-./mvnw build-helper:parse-version -DgenerateBackupPoms=false versions:set -DnewVersion="$currentVersion"
-./mvnw clean release:prepare release:perform \
-    -B -DgenerateReleasePoms=false -DgenerateBackupPoms=false \ 
-    -DreleaseVersion="$currentVersion" -DdevelopmentVersion="$developmentVersion"
 ```
 
 ## resources

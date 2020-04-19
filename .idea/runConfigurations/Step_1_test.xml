@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Step-2-test" type="JUnit" factoryName="JUnit">
+  <configuration default="false" name="Step-1-test" type="JUnit" factoryName="JUnit">
     <module name="step-1-test-application-with-default-spring-security" />
     <useClassPathOnly />
     <extension name="coverage">
@@ -9,7 +9,7 @@
       </pattern>
     </extension>
     <option name="PACKAGE_NAME" value="daggerok" />
-    <option name="MAIN_CLASS_NAME" value="daggerok.AppTest" />
+    <option name="MAIN_CLASS_NAME" value="daggerok.ApplicationTest" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
     <option name="PARAMETERS" value="" />

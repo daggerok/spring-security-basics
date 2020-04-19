@@ -9,7 +9,7 @@
       </pattern>
     </extension>
     <option name="PACKAGE_NAME" value="daggerok" />
-    <option name="MAIN_CLASS_NAME" value="daggerok.AppTest" />
+    <option name="MAIN_CLASS_NAME" value="daggerok.ApplicationTest" />
     <option name="METHOD_NAME" value="test" />
     <option name="TEST_OBJECT" value="method" />
     <option name="PARAMETERS" value="" />

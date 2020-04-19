@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Step-0-app" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="step-0-application-without-security" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="daggerok.App" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="daggerok.Application" />
     <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=ci" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">

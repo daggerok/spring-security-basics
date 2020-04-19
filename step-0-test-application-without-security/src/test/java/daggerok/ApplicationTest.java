@@ -20,21 +20,21 @@ import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
+@SpringBootApplication
+@EnableConfigurationProperties(TestApplicationProps.class)
+class TestApplication { }
+
 @Value
-@ConfigurationProperties("props")
-class Props {
+@ConfigurationProperties("test-application-props")
+class TestApplicationProps {
 
   String baseUrl;
 
   @ConstructorBinding
-  Props(@DefaultValue("http://127.0.0.1:8080") String baseUrl) {
+  TestApplicationProps(@DefaultValue("http://127.0.0.1:8080") String baseUrl) {
     this.baseUrl = baseUrl;
   }
 }
-
-@SpringBootApplication
-@EnableConfigurationProperties(Props.class)
-class TestContext { }
 
 @Tag("e2e")
 @SpringBootTest
@@ -49,13 +49,13 @@ abstract class AbstractTest {
 
 @Log4j2
 @AllArgsConstructor
-class AppTest extends AbstractTest {
+class ApplicationTest extends AbstractTest {
 
   ApplicationContext context;
 
   @Test
   void test() {
-    var props = context.getBean(Props.class);
+    var props = context.getBean(TestApplicationProps.class);
     open(props.getBaseUrl());
 
     var h1 = $("h1");

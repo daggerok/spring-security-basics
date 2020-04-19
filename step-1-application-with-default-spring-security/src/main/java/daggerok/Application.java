@@ -2,8 +2,6 @@ package daggerok;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.boot.actuate.context.ShutdownEndpoint;
-import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,6 +20,7 @@ class IndexPage {
 
 @EnableWebSecurity
 class MyWebSecurity extends WebSecurityConfigurerAdapter {
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
@@ -29,14 +28,14 @@ class MyWebSecurity extends WebSecurityConfigurerAdapter {
           .anyRequest().authenticated()//.fullyAuthenticated()//
         .and()
           .csrf().disable()
-        .formLogin()
+        .formLogin()//.and().httpBasic()
     ;
   }
 }
 
 @SpringBootApplication
-public class App {
+public class Application {
   public static void main(String[] args) {
-    SpringApplication.run(App.class, args);
+    SpringApplication.run(Application.class, args);
   }
 }
