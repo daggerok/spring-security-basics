@@ -6,6 +6,7 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 * [Step 1: Add authentication](#step-1)
 * [Step 2: Custom authentication](#step-2)
 * [Step 3: Add authorization](#step-3)
+* [Step 4: JavaEE + Spring Security](#step-4)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -371,6 +372,175 @@ class ApplicationTest {
     closeWebDriver();
   }
 }
+```
+
+## step: 4
+
+let's try use Spring Security together with JavaEE!
+NOTE: use spring version 4.x, not 5!
+
+in this step we will configure JavaEE app for next
+sets of security rules:
+
+allowed for all: `/`, `/favicon.ico`, `/api/health`, `/login`, `/logout`
+allowed for admins only: `/admin`
+all other paths allowed only for authenticated users.
+
+### application
+
+dependencies:
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-config</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-taglibs</artifactId>
+  </dependency>
+</dependencies>
+```
+
+JAX-RS application:
+
+```java
+@ApplicationScoped
+@ApplicationPath("api")
+public class Config extends Application { }
+
+@Path("")
+@RequestScoped
+@Produces(APPLICATION_JSON)
+public class HealthResource {
+
+  @GET
+  @Path("health")
+  public JsonObject hello() {
+    return Json.createObjectBuilder()
+               .add("status", "UP")
+               .build();
+  }
+}
+
+@Path("v1")
+@RequestScoped
+@Produces(APPLICATION_JSON)
+public class MyResource {
+
+  @GET
+  @Path("hello")
+  public JsonObject hello() {
+    return Json.createObjectBuilder()
+               .add("hello", "world!")
+               .build();
+  }
+}
+```
+
+Spring Security configuration:
+
+```java
+@Configuration
+@EnableWebSecurity
+public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    // @formatter:off
+    auth.inMemoryAuthentication()
+          .withUser("user")
+          .password("password")
+          .roles("USER")
+        .and()
+          .withUser("admin")
+          .password("admin")
+          .roles("ADMIN")
+    // @formatter:on
+    ;
+  }
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    // @formatter:off
+    http.authorizeRequests()
+          .antMatchers("/", "/favicon.ico", "/api/health").permitAll()
+          .antMatchers("/admin/**").hasRole("ADMIN")
+          .anyRequest().authenticated()
+        .and()
+          .formLogin()
+        .and()
+          .logout()
+            .logoutSuccessUrl("/")
+            .clearAuthentication(true)
+            .invalidateHttpSession(true)
+            .deleteCookies("JSESSIONID")
+        .and()
+          .csrf().disable()
+        .sessionManagement()
+          .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+    // @formatter:on
+    ;
+  }
+}
+
+public class SecurityWebApplicationInitializer extends AbstractSecurityWebApplicationInitializer {
+
+  public SecurityWebApplicationInitializer() {
+    super(SpringSecurityConfig.class);
+  }
+}
+```
+
+add `src/main/resources/META-INF/beans.xml` file:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
+       bean-discovery-mode="annotated">
+</beans>
+```
+
+finally, add HTML pages:
+
+file `src/main/webapp/index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Hello!</title>
+</head>
+<body>
+  <h1>Hello!</h1>
+</body>
+</html>
+```
+
+file `src/main/webapp/admin/index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Admin</title>
+</head>
+<body>
+  <h1>Admin page</h1>
+</body>
+</html>
+```
+
+### test application
+
+```bash
+./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security
+./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:build docker:start
+# do testing...
+./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:stop docker:remove
 ```
 
 ## maven

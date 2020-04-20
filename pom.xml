@@ -17,6 +17,8 @@
     <module>step-2-test-custom-authentication</module>
     <module>step-3-authorization</module>
     <module>step-3-test-authorization</module>
+    <module>step-4-java-ee-jaxrs-jboss-spring-security</module>
+    <module>step-4-test-java-ee-jboss-spring-security</module>
   </modules>
   <properties>
     <encoding>UTF-8</encoding>

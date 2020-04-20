@@ -251,3 +251,68 @@ jobs:
     - run: http get :8080
     - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-3-test-authorization -Dgroups=e2e
     - run: http --ignore-stdin -a user:pwd post :8080/actuator/shutdown
+  step-4-java-ee-jaxrs-jboss-spring-security:
+    strategy:
+      matrix:
+        java: [11]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    name: java-${{ matrix.java }} step-4-java-ee-jaxrs-jboss-spring-security
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/mvnw') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+          ${{ runner.os }}-maven-
+          ${{ runner.os }}-node-
+          ${{ runner.os }}-npm-
+          ${{ runner.os }}-
+    - uses: actions/cache@v1
+      with:
+        path: ~/.docker
+        key: ${{ runner.os }}-docker-${{ hashFiles('**/mvnw') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+          ${{ runner.os }}-maven-
+          ${{ runner.os }}-node-
+          ${{ runner.os }}-npm-
+          ${{ runner.os }}-
+    - uses: actions/cache@v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-npm-${{ hashFiles('**/mvnw') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+          ${{ runner.os }}-maven-
+          ${{ runner.os }}-node-
+          ${{ runner.os }}-npm-
+          ${{ runner.os }}-
+    - uses: actions/cache@v1
+      with:
+        path: ~/.node
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/mvnw') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+          ${{ runner.os }}-maven-
+          ${{ runner.os }}-node-
+          ${{ runner.os }}-npm-
+          ${{ runner.os }}-
+    - uses: actions/setup-node@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - run: hash docker 2>/dev/null || { echo >&2 "I require docker but it's not installed.  Aborting."; exit 1; }
+    - run: sudo apt-get install -y httpie
+    - run: npm i -g wait-port
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:build docker:start
+    - run: ( bash $GITHUB_WORKSPACE/step-4-java-ee-jaxrs-jboss-spring-security/target/*jar & ) || echo ...
+    - run: wait-port 8080
+    - run: http get :8080
+    - run: http get :8080/app/
+    - run: http get :8080/app/api/health
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-4-test-java-ee-jboss-spring-security -Dgroups=e2e
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:stop docker:remove
