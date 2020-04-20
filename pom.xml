@@ -7,7 +7,7 @@
   <name>${project.artifactId}</name>
   <modelVersion>4.0.0</modelVersion>
   <packaging>pom</packaging>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <modules>
     <module>step-0-application-without-security</module>
     <module>step-0-test-application-without-security</module>
