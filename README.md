@@ -6,7 +6,7 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 * [Step 1: Add authentication](#step-1)
 * [Step 2: Custom authentication](#step-2)
 * [Step 3: Add authorization](#step-3)
-* [Step 4: JavaEE + Spring Security](#step-4)
+* [Step 4: JavaEE and Spring Security](#step-4)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -539,7 +539,7 @@ file `src/main/webapp/admin/index.html`:
 ```bash
 ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security
 ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:build docker:start
-# do testing...
+./mvnw -f step-4-test-java-ee-jboss-spring-security -Dgroups=e2e
 ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:stop docker:remove
 ```
 
