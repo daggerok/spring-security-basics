@@ -5,7 +5,7 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 * [Step 0: No security](#step-0)
 * [Step 1: Add authentication](#step-1)
 * [Step 2: Custom authentication](#step-2)
-* [Step 3: TODO: Add authorization](#step-3)
+* [Step 3: Add authorization](#step-3)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -254,8 +254,124 @@ now we can authenticate with `users`/`password` or `admin`/`admin`
 
 ## step: 3
 
-next step is adding authorization, so we can distinguish that different users
+now let's add authorization, so we can distinguish that different users
 have access to some resources where others are not!
+
+### application
+
+in next configuration access to `/admin` path:
+
+```java
+@Controller
+class AdminPage {
+
+  @GetMapping("admin")
+  String index() {
+    return "admin/index.html";
+  }
+}
+```
+
+add `admin/index.html` file:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Admin Page | spring-security baby-steps</title>
+</head>
+<body>
+<h2>Administration page</h2>
+</body>
+</html>
+```
+
+we can allow to users with admin role:
+
+```java
+@EnableWebSecurity
+class MyWebSecurity extends WebSecurityConfigurerAdapter {
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.authorizeRequests()
+          .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
+          .antMatchers("/admin/**").hasRole("ADMIN")
+          .anyRequest().authenticated()
+        .and()
+          .csrf().disable()
+        .formLogin()
+    ;
+  }
+}
+``` 
+
+### test application
+
+```java
+@Value
+@ConstructorBinding
+@ConfigurationProperties("test-application-props")
+class TestApplicationProps {
+
+  String baseUrl;
+  User admin;
+  User user;
+
+  @Value
+  @ConstructorBinding
+  static class User {
+    String username;
+    String password;
+  }
+}
+
+@Log4j2
+@Tag("e2e")
+@AllArgsConstructor
+@SpringBootTest(properties = {
+    "test-application-props.user.username=user",
+    "test-application-props.user.password=password",
+    "test-application-props.admin.username=admin",
+    "test-application-props.admin.password=admin",
+    "test-application-props.base-url=http://127.0.0.1:8080",
+})
+class ApplicationTest {
+
+  ApplicationContext context;
+
+  @Test
+  void admin_should_authorize() {
+    var props = context.getBean(TestApplicationProps.class);
+    open(String.format("%s/admin", props.getBaseUrl()));
+    $("#username").setValue(props.getAdmin().getUsername());
+    $("#password").setValue(props.getAdmin().getPassword()).submit();
+
+    var h2 = $("h2");
+    log.info("h2 html: {}", h2);
+    h2.shouldBe(exist, visible)
+      .shouldHave(text("administration"));
+  }
+
+  @Test
+  void test_forbidden_403() {
+    var props = context.getBean(TestApplicationProps.class);
+    open(String.format("%s/admin", props.getBaseUrl()));
+    $("#username").setValue(props.getUser().getUsername());
+    $("#password").setValue(props.getUser().getPassword()).submit();
+    $(withText("403")).shouldBe(exist, visible);
+    $(withText("Forbidden")).shouldBe(exist, visible);
+  }
+
+  @AfterEach
+  void after() {
+    closeWebDriver();
+  }
+}
+```
 
 ## maven
 
