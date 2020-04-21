@@ -7,6 +7,7 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 * [Step 2: Custom authentication](#step-2)
 * [Step 3: Add authorization](#step-3)
 * [Step 4: JavaEE and Spring Security](#step-4)
+* [Step 5: JDBC authentication](#step-5)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -541,6 +542,82 @@ file `src/main/webapp/admin/index.html`:
 ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:build docker:start
 ./mvnw -f step-4-test-java-ee-jboss-spring-security -Dgroups=e2e
 ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:stop docker:remove
+```
+
+## step: 5
+
+let's use jdbc database as users / roles store.
+
+security config:
+
+```java
+@EnableWebSecurity
+@RequiredArgsConstructor
+class MyWebSecurity extends WebSecurityConfigurerAdapter {
+
+  final DataSource dataSource;
+
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    auth.jdbcAuthentication()
+          .dataSource(dataSource)
+          .usersByUsernameQuery(
+             " select sec_username, sec_password, sec_enabled " +
+             " from sec_users where sec_username=?            "
+          )
+          .authoritiesByUsernameQuery(
+            " select sec_username, sec_authority        " +
+            " from sec_authorities where sec_username=? "
+          );
+    ;
+  }
+
+  // ...
+}
+```
+
+sql schema and data:
+
+```sql
+drop index if exists sec_authorities_idx;
+drop table if exists sec_authorities;
+drop table if exists sec_users;
+drop schema if exists "public";
+
+create schema "public";
+
+create table sec_users (
+  sec_username varchar(255) not null primary key,
+  sec_password varchar(1024) not null,
+  sec_enabled boolean not null
+);
+
+create table sec_authorities (
+  sec_username varchar(255) not null,
+  sec_authority varchar(255) not null,
+  constraint sec_authorities_fk
+    foreign key (sec_username)
+      references sec_users (sec_username)
+);
+
+create unique index sec_authorities_idx
+  on sec_authorities (sec_username, sec_authority);
+
+insert into sec_users (sec_username, sec_password, sec_enabled)
+values ('user', '{bcrypt}$2a$10$OlBp2JOK0/8xDjiVqh4OYOggr3tHTKfBcv82dso4fsnUPo66f5Ury', true),  -- password
+       ('admin', '{bcrypt}$2a$10$OKPak8tw3jYSyqil/eNKz.U1nF/HtabOotUqi2ceeLuWdBsejH9yS', true); -- admin
+insert into sec_authorities (sec_username, sec_authority)
+values ('user', 'ROLE_USER'),
+       ('admin', 'ROLE_ADMIN');
+```
+
+testing:
+
+```bash
+./mvnw -f step-5-jdbc-authentication clean package spring-boot:build-image docker-compose:up
+while ! [[ `curl -s -o /dev/null -w "%{http_code}" 0:8080/actuator/health` -eq 200 ]] ; do sleep 1s ; echo -n '.' ; done
+./mvnw -f step-5-test-jdbc-authentication -Dgroups=e2e 
+./mvnw -f step-5-jdbc-authentication docker-compose:down
 ```
 
 ## maven

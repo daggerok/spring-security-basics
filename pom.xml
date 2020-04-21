@@ -19,6 +19,8 @@
     <module>step-3-test-authorization</module>
     <module>step-4-java-ee-jaxrs-jboss-spring-security</module>
     <module>step-4-test-java-ee-jboss-spring-security</module>
+    <module>step-5-jdbc-authentication</module>
+    <module>step-5-test-jdbc-authentication</module>
   </modules>
   <properties>
     <encoding>UTF-8</encoding>
@@ -32,10 +34,11 @@
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
+    <docker-compose-maven-plugin.version>4.0.0</docker-compose-maven-plugin.version>
+    <chromeoptions.args>--no-sandbox</chromeoptions.args>
     <groups>ignore-all-e2e-tests-by-default</groups>
     <selenide.headless>true</selenide.headless>
     <selenide.browser>chrome</selenide.browser>
-    <chromeoptions.args>--no-sandbox</chromeoptions.args>
   </properties>
   <developers>
     <developer>
@@ -170,6 +173,20 @@
       </plugins>
     </pluginManagement>
   </build>
+  <repositories>
+    <repository>
+      <id>milestone</id>
+      <name>milestone</name>
+      <url>https://repo.spring.io/milestone/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>milestone</id>
+      <name>milestone</name>
+      <url>https://repo.spring.io/milestone/</url>
+    </pluginRepository>
+  </pluginRepositories>
   <profiles>
     <profile>
       <id>ci</id>
