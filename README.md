@@ -7,7 +7,8 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 * [Step 2: Custom authentication](#step-2)
 * [Step 3: Add authorization](#step-3)
 * [Step 4: JavaEE and Spring Security](#step-4)
-* [Step 5: JDBC authentication](#step-5)
+* [Step 5: JDBC authentication](#step-5-1)
+* [Step 5: Spring Data JDBC authentication](#step-5-2)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -544,7 +545,7 @@ file `src/main/webapp/admin/index.html`:
 ./mvnw -f step-4-java-ee-jaxrs-jboss-spring-security docker:stop docker:remove
 ```
 
-## step: 5
+## step: 5.1
 
 let's use jdbc database as users / roles store.
 
@@ -616,16 +617,111 @@ testing:
 ```bash
 ./mvnw -f step-5-jdbc-authentication clean package spring-boot:build-image docker-compose:up
 while ! [[ `curl -s -o /dev/null -w "%{http_code}" 0:8080/actuator/health` -eq 200 ]] ; do sleep 1s ; echo -n '.' ; done
-./mvnw -f step-5-test-jdbc-authentication -Dgroups=e2e 
+./mvnw -f step-5-test-jdbc -Dgroups=e2e 
 ./mvnw -f step-5-jdbc-authentication docker-compose:down
 ```
 
-### spring-data-jdbc
+## step: 5.2
+
+let's use spring-data-jdbc database as users / roles store.
+
+add security entity, repository and service:
+
+```java
+@With
+@Value
+@Table("sec_users")
+class Security {
+
+  @Id
+  @Column("sec_username") String username;
+  @Column("sec_password") String password;
+  @Column("sec_enabled") boolean active;
+  @Column("sec_authority") String authority;
+
+  public UserDetails toUserDetails() {
+    return User.builder()
+               .username(username)
+               .password(password)
+               .disabled(!active)
+               .accountExpired(!active)
+               .credentialsExpired(!active)
+               .authorities(AuthorityUtils.createAuthorityList(authority))
+               .build();
+  }
+}
+
+interface SecurityRepository extends CrudRepository<Security, String> {
+
+  @Query("select * from sec_users where sec_username = :username limit 1")
+  Optional<Security> findFirstByUsername(@Param("username") String username);
+}
+
+@Service
+@RequiredArgsConstructor
+class SecurityService implements UserDetailsService {
+
+  final SecurityRepository securityRepository;
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    return securityRepository.findFirstByUsername(username)
+                             .map(Security::toUserDetails)
+                             .orElseThrow(() -> new UsernameNotFoundException(
+                                 String.format("User %s not found.", username)));
+  }
+}
+```
+
+security config:
+
+```java
+@EnableWebSecurity
+@RequiredArgsConstructor
+class MyWebSecurity extends WebSecurityConfigurerAdapter {
+
+  final SecurityService securityService;
+
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    auth.userDetailsService(securityService);
+  }
+
+  // ...
+}
+```
+
+sql schema and data:
+
+```sql
+drop index if exists sec_users_authorities_idx;
+drop table if exists sec_users;
+drop schema if exists "public";
+
+create schema "public";
+
+create table sec_users (
+  sec_username varchar(255) not null primary key,
+  sec_password varchar(1024) not null,
+  sec_enabled boolean not null,
+  sec_authority varchar(255) not null
+);
+
+create unique index sec_users_authorities_idx
+  on sec_users (sec_username, sec_authority);
+
+insert into sec_users (sec_username, sec_password, sec_enabled, sec_authority)
+values ('user', '{bcrypt}$2a$10$OlBp2JOK0/8xDjiVqh4OYOggr3tHTKfBcv82dso4fsnUPo66f5Ury', true, 'ROLE_USER')
+,      ('admin', '{bcrypt}$2a$10$OKPak8tw3jYSyqil/eNKz.U1nF/HtabOotUqi2ceeLuWdBsejH9yS', true, 'ROLE_ADMIN')
+;
+```
+
+testing:
 
 ```bash
 ./mvnw -f step-5-spring-data-jdbc-authentication clean package spring-boot:build-image docker-compose:up
 while ! [[ `curl -s -o /dev/null -w "%{http_code}" 0:8080/actuator/health` -eq 200 ]] ; do sleep 1s ; echo -n '.' ; done
-./mvnw -f step-5-test-jdbc-authentication -Dgroups=e2e 
+./mvnw -f step-5-test-jdbc -Dgroups=e2e 
 ./mvnw -f step-5-spring-data-jdbc-authentication docker-compose:down
 ```
 

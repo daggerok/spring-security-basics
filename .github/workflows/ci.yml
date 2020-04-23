@@ -356,7 +356,7 @@ jobs:
     - run: sleep 5s
     - run: curl 0:8080
     - run: curl 0:8080/actuator/health
-    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-test-jdbc-authentication -Dgroups=e2e
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-test-jdbc -Dgroups=e2e
     - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-jdbc-authentication docker-compose:down
   step-5-spring-data-jdbc-authentication:
     strategy:
@@ -398,5 +398,5 @@ jobs:
     - run: sleep 5s
     - run: curl 0:8080
     - run: curl 0:8080/actuator/health
-    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-test-jdbc-authentication -Dgroups=e2e
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-test-jdbc -Dgroups=e2e
     - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-spring-data-jdbc-authentication docker-compose:down

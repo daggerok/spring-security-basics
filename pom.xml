@@ -20,8 +20,8 @@
     <module>step-4-java-ee-jaxrs-jboss-spring-security</module>
     <module>step-4-test-java-ee-jboss-spring-security</module>
     <module>step-5-jdbc-authentication</module>
-    <module>step-5-test-jdbc-authentication</module>
     <module>step-5-spring-data-jdbc-authentication</module>
+    <module>step-5-test-jdbc</module>
   </modules>
   <properties>
     <encoding>UTF-8</encoding>
