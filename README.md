@@ -2,6 +2,7 @@
 Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 
 ## Table of Content
+
 * [Step 0: No security](#step-0)
 * [Step 1: Add authentication](#step-1)
 * [Step 2: Custom authentication](#step-2)
@@ -9,6 +10,7 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 * [Step 4: JavaEE and Spring Security](#step-4)
 * [Step 5.1: JDBC authentication](#step-51)
 * [Step 5.2: Spring Data JDBC authentication](#step-52)
+* [Step 5.3: Spring Data JPA authentication](#step-53)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -720,9 +722,153 @@ testing:
 
 ```bash
 ./mvnw -f step-5-spring-data-jdbc-authentication clean package spring-boot:build-image docker-compose:up
-while ! [[ `curl -s -o /dev/null -w "%{http_code}" 0:8080/actuator/health` -eq 200 ]] ; do sleep 1s ; echo -n '.' ; done
 ./mvnw -f step-5-test-jdbc -Dgroups=e2e 
 ./mvnw -f step-5-spring-data-jdbc-authentication docker-compose:down
+```
+
+## step: 5.3
+
+let's use spring-data-jpa this time.
+
+required changes:
+
+```java
+@Data
+@Entity
+@Setter(PROTECTED)
+@NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor(staticName = "of")
+@Table(name = "sec_users")
+class Security {
+
+  @Id
+  @Column(nullable = false, name = "sec_username")
+  private String username;
+
+  @Column(nullable = false, name = "sec_password")
+  private String password;
+
+  @Column(nullable = false, name = "sec_enabled")
+  private boolean active;
+
+  @Column(nullable = false, name = "sec_authority")
+  private String authority;
+
+  public UserDetails toUserDetails() {
+    return User.builder()
+               .username(username)
+               .password(password)
+               .disabled(!active)
+               .accountExpired(!active)
+               .credentialsExpired(!active)
+               .authorities(AuthorityUtils.createAuthorityList(authority))
+               .build();
+  }
+}
+
+interface SecurityRepository extends CrudRepository<Security, String> {
+
+  @Query
+  Optional<Security> findFirstByUsername(@Param("username") String username);
+}
+
+@Service
+@RequiredArgsConstructor
+class SecurityService implements UserDetailsService {
+
+  final SecurityRepository securityRepository;
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    return securityRepository.findFirstByUsername(username)
+                             .map(Security::toUserDetails)
+                             .orElseThrow(() -> new UsernameNotFoundException(
+                                 String.format("User %s not found.", username)));
+  }
+}
+
+@EnableWebSecurity
+@RequiredArgsConstructor
+class MyWebSecurity extends WebSecurityConfigurerAdapter {
+
+  final SecurityService securityService;
+
+  @Bean
+  PasswordEncoder passwordEncoder() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+  }
+
+  @Override
+  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    auth.userDetailsService(securityService);
+  }
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.authorizeRequests()
+          .requestMatchers(EndpointRequest.to("health", "shutdown")).permitAll()
+          .antMatchers("/", "/favicon.ico", "/assets/**").permitAll()
+          .antMatchers("/admin/**").hasRole("ADMIN")
+          .anyRequest().authenticated()
+        .and()
+          .csrf().disable()
+        .formLogin()
+          .and()
+        .httpBasic()
+    ;
+  }
+}
+```
+
+_application.yaml` file:
+
+```yaml
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:127.0.0.1}:${POSTGRES_PORT:5432}/${POSTGRES_DB:postgres}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  flyway:
+    enabled: true
+  jpa:
+    database: postgresql
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+```
+
+`db/migration` scripts:
+
+```sql
+create table sec_users (
+  sec_username varchar(255) not null primary key,
+  sec_password varchar(1024) not null,
+  sec_enabled boolean not null,
+  sec_authority varchar(255) not null
+)
+;
+create unique index sec_users_authorities_idx
+  on sec_users (sec_username, sec_authority)
+;
+insert into sec_users (sec_username, sec_password, sec_enabled, sec_authority)
+values ('user', '{bcrypt}$2a$10$OlBp2JOK0/8xDjiVqh4OYOggr3tHTKfBcv82dso4fsnUPo66f5Ury', true, 'ROLE_USER')
+,      ('admin', '{bcrypt}$2a$10$OKPak8tw3jYSyqil/eNKz.U1nF/HtabOotUqi2ceeLuWdBsejH9yS', true, 'ROLE_ADMIN')
+;
+```
+
+testing:
+
+```bash
+# docker-compose -f step-5-spring-data-jpa-authentication/docker-compose.yaml up postgres
+./mvnw -f step-5-spring-data-jpa-authentication clean package spring-boot:build-image docker-compose:up
+./mvnw -f step-5-test-jdbc -Dgroups=e2e 
+./mvnw -f step-5-spring-data-jpa-authentication docker-compose:down
 ```
 
 ## maven

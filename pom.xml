@@ -21,6 +21,7 @@
     <module>step-4-test-java-ee-jboss-spring-security</module>
     <module>step-5-jdbc-authentication</module>
     <module>step-5-spring-data-jdbc-authentication</module>
+    <module>step-5-spring-data-jpa-authentication</module>
     <module>step-5-test-jdbc</module>
   </modules>
   <properties>

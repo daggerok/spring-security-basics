@@ -400,3 +400,45 @@ jobs:
     - run: curl 0:8080/actuator/health
     - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-test-jdbc -Dgroups=e2e
     - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-spring-data-jdbc-authentication docker-compose:down
+  step-5-spring-data-jpa-authentication:
+    strategy:
+      matrix:
+        java: [11]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    name: java-${{ matrix.java }} step-5-spring-data-jpa-authentication
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/mvnw') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+          ${{ runner.os }}-maven-
+          ${{ runner.os }}-node-
+          ${{ runner.os }}-npm-
+          ${{ runner.os }}-
+    - uses: actions/cache@v1
+      with:
+        path: ~/.docker
+        key: ${{ runner.os }}-docker-${{ hashFiles('**/mvnw') }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+          ${{ runner.os }}-maven-
+          ${{ runner.os }}-node-
+          ${{ runner.os }}-npm-
+          ${{ runner.os }}-
+          ${{ runner.os }}-
+    - uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - run: command -v docker >/dev/null 2>&1 || { echo >&2 "I require docker but it's not installed.  Aborting."; exit 1; }
+    - run: sudo apt-get install -y curl
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-spring-data-jpa-authentication clean package spring-boot:build-image docker-compose:up
+    - run: while ! [[ `curl -s -o /dev/null -w "%{http_code}" 0:8080/actuator/health` -eq 200 ]] ; do sleep 1s ; echo -n '.' ; done
+    - run: sleep 5s
+    - run: curl 0:8080
+    - run: curl 0:8080/actuator/health
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-test-jdbc -Dgroups=e2e
+    - run: cd $GITHUB_WORKSPACE && ./mvnw -f step-5-spring-data-jpa-authentication docker-compose:down

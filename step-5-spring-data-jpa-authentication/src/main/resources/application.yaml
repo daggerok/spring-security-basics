@@ -1,0 +1,46 @@
+---
+spring:
+  output:
+    ansi:
+      enabled: always
+  profiles:
+    include:
+    - db
+---
+spring:
+  profiles: db
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:127.0.0.1}:${POSTGRES_PORT:5432}/${POSTGRES_DB:postgres}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    hikari:
+      connection-test-query: 'SELECT 1'
+  flyway:
+    enabled: true
+  jpa:
+    database: postgresql
+    #database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: false
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+---
+spring:
+  profiles: ci
+management:
+  endpoint:
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+        #include: >
+        #  shutdown,
+        #  health
+---
