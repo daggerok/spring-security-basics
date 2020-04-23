@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <!--<parent>
+    <artifactId>spring-security-basics</artifactId>
+    <groupId>com.giuthub.daggerok</groupId>
+    <relativePath>..</relativePath>
+    <version>1.0.5</version>
+  </parent>-->
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.giuthub.daggerok</groupId>
   <artifactId>step-4-java-ee-jaxrs-jboss-spring-security</artifactId>
@@ -9,20 +15,17 @@
   <packaging>war</packaging>
   <version>1.0.5</version>
   <properties>
-    <encoding>UTF-8</encoding>
-    <java.version>1.8</java.version>
+    <java.version>11</java.version>
     <json.version>1.1.4</json.version>
-    <jaxb.version>2.3.1</jaxb.version>
     <activation.version>1.1.1</activation.version>
     <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
     <docker-maven-plugin.version>0.33.0</docker-maven-plugin.version>
     <jakarta.jakartaee-api.version>8.0.0</jakarta.jakartaee-api.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
     <resteasy-json-p-provider.version>4.5.3.Final</resteasy-json-p-provider.version>
     <spring-security-web.version>4.2.15.RELEASE</spring-security-web.version><!-- use < 5.x only! -->
     <!--<spring-security-web.version>5.3.1.RELEASE</spring-security-web.version>-->
-    <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
   </properties>
   <dependencies>
     <dependency>

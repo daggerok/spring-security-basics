@@ -1,4 +1,4 @@
-FROM daggerok/jboss-eap-7.2:7.2.5-alpine
+FROM daggerok/jboss-eap-7.3:7.3.0-debian
 EXPOSE 8080
 HEALTHCHECK --retries=33 \
             --timeout=1s \

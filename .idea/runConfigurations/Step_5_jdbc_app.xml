@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Step-5-app" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="Step-5-jdbc-app" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="step-5-jdbc-authentication" />
     <extension name="coverage">
       <pattern>
