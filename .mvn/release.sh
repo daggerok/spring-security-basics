@@ -17,5 +17,5 @@ else
   ./mvnw build-helper:parse-version -DgenerateBackupPoms=false -DgenerateBackupPoms=false versions:set \
     -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion} \
     -f step-4-java-ee-jaxrs-jboss-spring-security
-  git add . ; git commit -am "v$currentVersion release." ; git push --tags
+  git add . ; git commit -am "v$currentVersion release." ; git push origin master --tags
 fi
