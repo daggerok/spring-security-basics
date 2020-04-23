@@ -6,7 +6,7 @@
     <artifactId>spring-security-basics</artifactId>
     <groupId>com.giuthub.daggerok</groupId>
     <relativePath>..</relativePath>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
   </parent>
   <packaging>jar</packaging>
   <modelVersion>4.0.0</modelVersion>

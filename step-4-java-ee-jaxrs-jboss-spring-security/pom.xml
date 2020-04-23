@@ -13,7 +13,7 @@
   <artifactId>step-4-java-ee-jaxrs-jboss-spring-security</artifactId>
   <name>${project.artifactId}</name>
   <packaging>war</packaging>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <properties>
     <java.version>11</java.version>
     <json.version>1.1.4</json.version>
