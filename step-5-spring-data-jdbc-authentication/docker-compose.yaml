@@ -1,0 +1,35 @@
+version: '2.1'
+networks:
+  backend-network:
+  frontend-network:
+services:
+  postgres:
+    image: library/postgres:11.7-alpine
+    ports: ['5432:5432']
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: pg_isready -h 127.0.0.1 -p 5432 -d $$POSTGRES_DB -U $$POSTGRES_USER
+      #test: ['CMD', 'pg_isready', '-h', '127.0.0.1', '-p', '5432', '-d', '$$POSTGRES_DB', '-U', '$$POSTGRES_USER']
+      timeout: 3s
+      retries: 33
+      interval: 33s
+    networks: [backend-network]
+  frontend:
+    image: daggerok/spring-security-basics-step-5-spring-data-jdbc-authentication:latest
+    ports: ['8080:8080']
+    environment:
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      SPRING_PROFILES_INCLUDE: ci
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+    - backend-network
+    - frontend-network

@@ -620,6 +620,15 @@ while ! [[ `curl -s -o /dev/null -w "%{http_code}" 0:8080/actuator/health` -eq 2
 ./mvnw -f step-5-jdbc-authentication docker-compose:down
 ```
 
+### spring-data-jdbc
+
+```bash
+./mvnw -f step-5-spring-data-jdbc-authentication clean package spring-boot:build-image docker-compose:up
+while ! [[ `curl -s -o /dev/null -w "%{http_code}" 0:8080/actuator/health` -eq 200 ]] ; do sleep 1s ; echo -n '.' ; done
+./mvnw -f step-5-test-jdbc-authentication -Dgroups=e2e 
+./mvnw -f step-5-spring-data-jdbc-authentication docker-compose:down
+```
+
 ## maven
 
 we will be releasing after each important step! so it will be easy simply checkout needed version from git tag.
