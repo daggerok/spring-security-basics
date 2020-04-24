@@ -914,6 +914,7 @@ next snapshot version:
 
 ## resources
 
+* (Modern Spring Security for Spring Actuator endpoints)[https://youtu.be/SSu7V-S5yec?t=520]
 * [YouTube: Spring Security Basics](https://www.youtube.com/playlist?list=PLqq-6Pq4lTTYTEooakHchTGglSvkZAjnE)
 * https://github.com/daggerok/spring-security-examples
 <!--
