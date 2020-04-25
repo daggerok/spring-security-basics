@@ -12,7 +12,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>step-5-spring-data-jdbc-authentication</artifactId>
   <properties>
-    <spring-boot.version>2.3.0.M4</spring-boot.version>
+    <spring-boot.version>${spring-boot-2.3.x.version}</spring-boot.version>
   </properties>
   <dependencies>
     <dependency>
@@ -46,42 +46,4 @@
       <scope>runtime</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <image>
-            <name>daggerok/${project.parent.artifactId}-${project.artifactId}</name>
-            <env>
-              <!--
-              <BP_JAVA_VERSION>8.0.242</BP_JAVA_VERSION>
-              <BP_JAVA_VERSION>13.0.2</BP_JAVA_VERSION>
-              -->
-              <BP_JAVA_VERSION>11.0.6</BP_JAVA_VERSION>
-            </env>
-            <!--<cleanCache>true</cleanCache>-->
-          </image>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.dkanejs.maven.plugins</groupId>
-        <artifactId>docker-compose-maven-plugin</artifactId>
-        <version>${docker-compose-maven-plugin.version}</version>
-        <configuration>
-          <build>true</build>
-          <detail>true</detail>
-          <verbose>false</verbose>
-          <detachedMode>true</detachedMode>
-          <ignorePullFailures>true</ignorePullFailures>
-          <removeImagesType>local</removeImagesType>
-          <removeImages>true</removeImages>
-          <removeOrphans>true</removeOrphans>
-          <removeVolumes>true</removeVolumes>
-          <composeFile>${project.basedir}/docker-compose.yaml</composeFile>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

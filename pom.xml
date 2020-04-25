@@ -23,6 +23,8 @@
     <module>step-5-spring-data-jdbc-authentication</module>
     <module>step-5-spring-data-jpa-authentication</module>
     <module>step-5-test-jdbc</module>
+    <!--<module>step-6-spring-ldap-security</module>
+    <module>step-6-test-spring-ldap-security</module>-->
   </modules>
   <properties>
     <encoding>UTF-8</encoding>
@@ -32,7 +34,9 @@
     <vavr.version>0.10.2</vavr.version>
     <selenide.version>5.10.0</selenide.version>
     <testcontainers.version>1.13.0</testcontainers.version>
+    <docker-hub.username>daggerok</docker-hub.username>
     <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+    <spring-boot-2.3.x.version>2.3.0.M4</spring-boot-2.3.x.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
@@ -172,6 +176,23 @@
             <!--<excludedGroups>e2e</excludedGroups>-->
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>com.dkanejs.maven.plugins</groupId>
+          <artifactId>docker-compose-maven-plugin</artifactId>
+          <version>${docker-compose-maven-plugin.version}</version>
+          <configuration>
+            <build>true</build>
+            <detail>true</detail>
+            <verbose>false</verbose>
+            <detachedMode>true</detachedMode>
+            <ignorePullFailures>true</ignorePullFailures>
+            <removeImagesType>local</removeImagesType>
+            <removeImages>true</removeImages>
+            <removeOrphans>true</removeOrphans>
+            <removeVolumes>true</removeVolumes>
+            <composeFile>${project.basedir}/docker-compose.yaml</composeFile>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -190,6 +211,36 @@
     </pluginRepository>
   </pluginRepositories>
   <profiles>
+    <profile>
+      <id>spring-boot-2.3.x</id>
+      <activation>
+        <property>
+          <name>spring-boot.version</name>
+          <value>${spring-boot-2.3.x.version}</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+              <image>
+                <name>${docker-hub.username}/${project.parent.artifactId}-${project.artifactId}</name>
+                <env>
+                  <!--
+                  <BP_JAVA_VERSION>8.0.242</BP_JAVA_VERSION>
+                  <BP_JAVA_VERSION>13.0.2</BP_JAVA_VERSION>
+                  -->
+                  <BP_JAVA_VERSION>11.0.6</BP_JAVA_VERSION>
+                </env>
+                <!--<cleanCache>true</cleanCache>-->
+              </image>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>ci</id>
       <activation>
