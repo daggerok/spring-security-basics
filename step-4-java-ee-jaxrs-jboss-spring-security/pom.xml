@@ -2,12 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <!--<parent>
-    <artifactId>spring-security-basics</artifactId>
-    <groupId>com.giuthub.daggerok</groupId>
-    <relativePath>..</relativePath>
-    <version>1.0.5</version>
-  </parent>-->
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.giuthub.daggerok</groupId>
   <artifactId>step-4-java-ee-jaxrs-jboss-spring-security</artifactId>
@@ -24,7 +18,7 @@
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
     <resteasy-json-p-provider.version>4.5.3.Final</resteasy-json-p-provider.version>
-    <spring-security-web.version>4.2.15.RELEASE</spring-security-web.version><!-- use < 5.x only! -->
+    <spring-security-web.version>4.2.15.RELEASE</spring-security-web.version><!-- use 4.x only! 5.x doesn't work... -->
     <!--<spring-security-web.version>5.3.1.RELEASE</spring-security-web.version>-->
   </properties>
   <dependencies>

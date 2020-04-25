@@ -11,6 +11,7 @@ Learn Spring Security by baby steps from zero to pro! (Status: IN PROGRESS)
 * [Step 5.1: JDBC authentication](#step-51)
 * [Step 5.2: Spring Data JDBC authentication](#step-52)
 * [Step 5.3: Spring Data JPA authentication](#step-53)
+* [Step 6: Spring LDAP Security](#step-6)
 * [Versioning and releasing](#maven)
 * [Resources and used links](#resources)
 
@@ -871,6 +872,137 @@ testing:
 ./mvnw -f step-5-spring-data-jpa-authentication docker-compose:down
 ```
 
+<!--
+
+## step: 6
+
+let's implement organizational security authentication (not authorization) by using LDAP catalog as auth storage.
+
+install LDAP using `ldap/Dockerfile`:
+
+```Dockerfile
+FROM osixia/openldap-backup:1.3.0
+LABEL MAINTAINER="Maksim Kostromin <daggerok@gmail.com> https://githuib.com/daggerok/spring-data-ldap-example"
+ENTRYPOINT ["/bin/bash"]
+CMD ["-c", "/container/tool/run --copy-service -l debug"]
+COPY --chown=openldap:openldap ./test-data.ldif /container/service/slapd/assets/config/bootstrap/ldif/50-test-data.ldif
+```
+
+it's testdata contains in `ldap/test-data.ldif` file:
+
+```ldap
+version: 1
+
+# Entry 3: uid=user,dc=my-test-company-domain,dc=com
+# user: uid=user,dc=my-test-company-domain,dc=com
+# password: password
+
+dn: uid=user,dc=my-test-company-domain,dc=com
+uid: user
+cn: user
+sn: 3
+description: My Test Company LDAP user organization account
+objectclass: top
+objectClass: inetOrgPerson
+mail: user@my-test-company-domain.com
+userPassword: password
+
+## Entries already exists / provided by docker container:
+#
+## Entry 1: dc=my-test-company-domain,dc=com
+#dn: dc=my-test-company-domain,dc=com
+#dc: my-test-company-domain
+#o: My Test Company Inc.
+#objectclass: top
+#objectclass: dcObject
+#objectclass: organization
+#
+## Entry 2: cn=admin,dc=my-test-company-domain,dc=com
+#dn: cn=admin,dc=my-test-company-domain,dc=com
+#cn: admin
+#description: My Test Company LDAP administrator
+#objectclass: simpleSecurityObject
+#objectclass: organizationalRole
+#userpassword: adm1nZupperUberP@assw0rd!!1111oneoneone
+## user: cn=admin,dc=my-test-company-domain,dc=com
+```
+
+compose everything in `docker.yaml` file:
+
+```yaml
+version: '2.1'
+networks:
+  backend-network:
+  frontend-network:
+services:
+  ldap:
+    hostname: ldap.my-test-company-domain.com
+    build: ./ldap
+    environment:
+      LDAP_ORGANISATION: My Test Company Inc.
+      LDAP_DOMAIN: my-test-company-domain.com
+      LDAP_BASE_DN: dc=my-test-company-domain,dc=com
+      LDAP_ADMIN_PASSWORD: adm1nZupperUberP@assw0rd!!1111oneoneone
+      LDAP_CONFIG_PASSWORD: config
+      LDAP_RFC2307BIS_SCHEMA: 'false'
+      LDAP_READONLY_USER: 'false'
+      LDAP_READONLY_USER_USERNAME: readonly
+      LDAP_READONLY_USER_PASSWORD: readonly
+      LDAP_BACKUP_CONFIG_CRON_EXP: '* * * * *'
+      LDAP_BACKUP_DATA_CRON_EXP: '*/15 * * * *'
+      LDAP_BACKUP_TTL: 7
+    ports:
+    - '389:389'
+    - '636:636'
+    networks:
+      backend-network:
+        aliases:
+        - ldap
+        - ldap.backend-network
+        - ldap.my-test-company-domain.com
+    healthcheck:
+      test: ( ( test 1 -eq `ss -tulwn | grep '0.0.0.0:389' | wc -l` ) && ( test 1 -eq `ss -tulwn | grep '0.0.0.0:636' | wc -l` ) ) || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 55
+  ldap-admin-ui:
+    image: osixia/phpldapadmin:0.9.0
+    depends_on:
+      ldap:
+        condition: service_healthy
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap.my-test-company-domain.com
+      LDAP_USER: cn=admin,dc=my-test-company-domain,dc=com
+      LDAP_PASSWORD: adm1nZupperUberP@assw0rd!!1111oneoneone
+    ports:
+    - '80:80'
+    - '443:443'
+    networks:
+    - backend-network
+    - frontend-network
+  frontend:
+    image: daggerok/spring-security-basics-step-6-spring-ldap-security
+    depends_on:
+      ldap:
+        condition: service_healthy
+    environment:
+      LDAP_HOST: ldap.my-test-company-domain.com
+      LDAP_BASE_DN: dc=my-test-company-domain,dc=com
+      LDAP_USER: cn=admin,dc=my-test-company-domain,dc=com
+      LDAP_PASSWORD: adm1nZupperUberP@assw0rd!!1111oneoneone
+    networks:
+    - backend-network
+    - frontend-network
+```
+
+le's test:
+
+```bash
+./mvnw -f step-6-spring-ldap-security package spring-boot:build-image docker-compose:up
+```
+
+-->
+
 ## maven
 
 we will be releasing after each important step! so it will be easy simply checkout needed version from git tag.
@@ -914,7 +1046,8 @@ next snapshot version:
 
 ## resources
 
-* (Modern Spring Security for Spring Actuator endpoints)[https://youtu.be/SSu7V-S5yec?t=520]
+* [Spring Security LDAP Authentication](https://spring.io/guides/gs/authenticating-ldap/)
+* [Modern Spring Security for Spring Actuator endpoints](https://youtu.be/SSu7V-S5yec?t=520)
 * [YouTube: Spring Security Basics](https://www.youtube.com/playlist?list=PLqq-6Pq4lTTYTEooakHchTGglSvkZAjnE)
 * https://github.com/daggerok/spring-security-examples
 <!--

@@ -11,9 +11,6 @@
   <packaging>jar</packaging>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>step-5-spring-data-jdbc-authentication</artifactId>
-  <properties>
-    <spring-boot.version>${spring-boot-2.3.x.version}</spring-boot.version>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>

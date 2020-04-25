@@ -4,7 +4,7 @@ networks:
   frontend-network:
 services:
   postgres:
-    image: library/postgres:11.7-alpine
+    image: docker.io/library/postgres:11.7-alpine
     ports: ['5432:5432']
     environment:
       POSTGRES_DB: postgres
